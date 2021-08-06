@@ -1,6 +1,6 @@
 
 #include "TChain.h"
-#include "TGString.h"
+#include "TString.h"
 #include "TTreeReader.h"
 #include "TTreeReaderArray.h"
 #include "TH1F.h"
