@@ -115,7 +115,7 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
         } else if (!passedHI18HEMfailurePho(iGen)) {
           continue;
           // gen photon selection
-        } else if (mcCalIsoDR04 > 5) {
+        } else if (mcCalIsoDR04[iGen] > 5) {
           continue;
         }
         if (mcPID[iGen] != 22)
