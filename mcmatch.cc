@@ -50,6 +50,10 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
     return !(phoSCEta[i] < -1.39 && phoSCPhi[i] < -0.9 && phoSCPhi[i] > -1.6);
   };
 
+  // For photon ID selections
+  TTreeReaderArray<Float_t> phoHoverE(dreader, "phoHoverE");
+  TTreeReaderArray<Float_t> mcCalIsoDR04(dreader, "mcCalIsoDR04");
+
   TFile fout(outName, "recreate");
   // histograms for efficiency study
   std::array<float, 6> ptbins = {15, 30, 40, 50, 80, 120};
@@ -86,6 +90,12 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
           // reject photons that failed HEM modules
         } else if (!passedHI18HEMfailurePho(genMatchedIndex)) {
           continue;
+          // photon selection
+        } else if (phoHoverE[iPho] > 0.1) {
+          continue;
+          // gen photon selection
+        } else if (mcCalIsoDR04[genMatchedIndex] > 5) {
+          continue;
         }
         // Fill  energy scale / resolution
         int ptbin = std::lower_bound(ptbins.cbegin(), ptbins.cend(), genPt) -
@@ -101,8 +111,11 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
         float genPt = (*mcPt)[iGen];
         if (genPt < ptbins.front() || genPt > ptbins.back()) {
           continue;
-          // reject photons failed HEM modules
+          // reject photons that failed HEM modules
         } else if (!passedHI18HEMfailurePho(iGen)) {
+          continue;
+          // gen photon selection
+        } else if (mcCalIsoDR04 > 5) {
           continue;
         }
         if (mcPID[iGen] != 22)
