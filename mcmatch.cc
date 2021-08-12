@@ -66,7 +66,7 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
   for (int i = 0; i < ptbins.size() - 1; ++i) {
     eScale[i] =
         new TH1F(TString::Format("esc%.0f_%.0f", ptbins[i], ptbins[i + 1]),
-                 "Energy scale", 30, 0.4, 1.6);
+                 "Energy scale", 100, 0.4, 1.6);
   }
   while (reader.Next()) {
     double centWeight = findNcoll(*centrality);
