@@ -63,12 +63,18 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
   TH1F total("tot", "total;pT/GeV", ptbins.size() - 1, ptbins.data());
   // gen photon that's matched to a RECO photon
   TH1F matched("mat", "matched;pT/GeV", ptbins.size() - 1, ptbins.data());
+  total.Sumw2();
+  matched.Sumw2();
+  // unweighted hists
+  TH1F totaluw("totuw", "total;pT/GeV", ptbins.size() - 1, ptbins.data());
+  TH1F matcheduw("matuw", "matched;pT/GeV", ptbins.size() - 1, ptbins.data());
   // histograms for energy scale study
   std::array<TH1F *, ptbins.size()> eScale;
   for (int i = 0; i < ptbins.size() - 1; ++i) {
     eScale[i] =
         new TH1F(TString::Format("esc%.0f_%.0f", ptbins[i], ptbins[i + 1]),
                  "Energy scale", 100, 0.4, 1.6);
+    eScale[i]->Sumw2();
   }
   while (reader.Next()) {
     double centWeight = findNcoll(*centrality);
@@ -123,8 +129,10 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
         if (mcPID[iGen] != 22)
           continue;
         total.Fill(genPt, centWeight);
+        totaluw.Fill(genPt);
         if (matchedGamma.count(iGen)) {
           matched.Fill(genPt, centWeight);
+          matcheduw.Fill(genPt);
         }
       }
     }
