@@ -18,10 +18,12 @@ float findNcoll(int);
 
 void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
         TString outName = "mcmatch.root") {
-  TChain *tch = new TChain("hiEvtAnalyzer/HiTree");
+  TChain *tch = new TChain("HiTree");
   tch->Add(fname);
-  TChain *tdata = new TChain("ggHiNtuplizer/EventTree");
+  TChain *tdata = new TChain("EventTree");
   tdata->Add(fname);
+  std::cout << tch->GetEntries() << "\n";
+
 
   TTreeReader reader(tch);
   TTreeReaderValue<Int_t> centrality(reader, "hiBin");
@@ -162,3 +164,10 @@ float findNcoll(int hiBin) {
   return Ncoll[hiBin];
 }
 
+
+void mcmatch() {
+  mc("pruned/zs04*.root", "out/zs04.root");
+  mc("pruned/zs08*.root", "out/zs08.root");
+  mc("pruned/zs10*.root", "out/zs10.root");
+  return;
+}
