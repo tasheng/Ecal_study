@@ -70,7 +70,7 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
   TH1F matcheduw("matuw", "matched;pT/GeV", ptbins.size() - 1, ptbins.data());
   // histograms for energy scale study
   std::array<TH1F *, ptbins.size()> eScale;
-  for (int i = 0; i < ptbins.size() - 1; ++i) {
+  for (auto i = 0; i < ptbins.size() - 1; ++i) {
     eScale[i] =
         new TH1F(TString::Format("esc%.0f_%.0f", ptbins[i], ptbins[i + 1]),
                  "Energy scale", 100, 0.4, 1.6);
@@ -115,7 +115,7 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
         }
       }
       // for every gen photon, fill hists based on its matching status
-      for (int iGen = 0; iGen < (*mcPt).size(); ++iGen) {
+      for (auto iGen = 0; iGen < (*mcPt).size(); ++iGen) {
         float genPt = (*mcPt)[iGen];
         if (genPt < ptbins.front() || genPt > ptbins.back()) {
           continue;
