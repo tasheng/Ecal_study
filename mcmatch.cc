@@ -174,8 +174,9 @@ float findNcoll(int hiBin) {
 
 
 void mcmatch() {
-  mc("pruned/zs04*.root", "out/zs04.root");
-  mc("pruned/zs08*.root", "out/zs08.root");
-  mc("pruned/zs10*.root", "out/zs10.root");
+  // mc("pruned/zs04*.root", "out/zs04.root");
+  // mc("pruned/zs08*.root", "out/zs08.root");
+  // mc("pruned/zs10*.root", "out/zs10.root");
+  mc("pruned/official*.root", "out/official.root");
   return;
 }
