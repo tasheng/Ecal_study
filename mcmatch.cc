@@ -160,7 +160,7 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
       if (matchedGamma.count(iGen)) {
         if (ismcEE(iGen)) {
           matchedEE.Fill(genPt, centWeight);
-        } else if (ismcEE(iGen)) {
+        } else if (ismcEB(iGen)) {
           matchedEB.Fill(genPt, centWeight);
         }
         matcheduw.Fill(genPt);
