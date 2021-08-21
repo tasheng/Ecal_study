@@ -30,7 +30,7 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
                                 "phoSCRawE", "mcE", "mcPt", "phoSigmaIEtaIEta_2012",
                                 "pho_swissCrx", "pho_seedTime",
                                 "phoHoverE", "mcCalIsoDR04",
-                                "phoSCEta", "phoSCPhi"}) {
+                                "phoSCEta", "phoSCPhi", "mcEta"}) {
     ntuple->SetBranchStatus(activeBranchName, 1);
   }
   evt->SetBranchStatus("hiBin", 1);
@@ -79,13 +79,13 @@ TString zs4 = "root://xrootd.cmsaf.mit.edu//store/user/pchou/run3/ECAL/QCDPhoton
 TString zs8 = "root://xrootd.cmsaf.mit.edu//store/user/pchou/run3/ECAL/QCDPhoton_pThat-15_TuneCP5_HydjetDrumMB_5p02TeV_Pythia8/HINPbPbAutumn18GSHIMix-103X_upgrade2018_realistic_HI_v11-v1_FOREST_ECAL_ZS_EB_EE_8_SR_HI_4_MI_2/210629_221354/0000/HiForestAOD_%d.root";
 TString zs10 = "root://xrootd.cmsaf.mit.edu//store/user/pchou/run3/ECAL/QCDPhoton_pThat-15_TuneCP5_HydjetDrumMB_5p02TeV_Pythia8/HINPbPbAutumn18GSHIMix-103X_upgrade2018_realistic_HI_v11-v1_FOREST_ECAL_ZS_EB_EE_10_SR_HI_4_MI_2/210629_221929/0000/HiForestAOD_%d.root";
 TString official = "root://xrootd.cmsaf.mit.edu//store/user/katatar/official/HIRun2018PbPb/QCDPhoton_pThat-15_TuneCP5_HydjetDrumMB_5p02TeV_Pythia8/HINPbPbAutumn18DR-mva98_103X_upgrade2018_realistic_HI_v11-v1-FOREST/190918_070650/0000/HiForestAOD_%d.root";
-// for (auto i = 30; i <= 30; ++i) {
-// 	cout << "saving " << i << "\n";
-// 	// mc(TString::Format(zs4, i), TString::Format("pruned/zs04_%d.root", i));
-// 	mc(TString::Format(zs8, i), TString::Format("pruned/zs08_%d.root", i));
-// 	// mc(TString::Format(zs10, i), TString::Format("pruned/zs10_%d.root", i));
-// }
- for (auto i = 1; i <=328; ++i) {
+for (auto i = 1; i <= 110; ++i) {
+	cout << "saving " << i << "\n";
+	mc(TString::Format(zs4, i), TString::Format("pruned/zs04_%d.root", i));
+	mc(TString::Format(zs8, i), TString::Format("pruned/zs08_%d.root", i));
+	mc(TString::Format(zs10, i), TString::Format("pruned/zs10_%d.root", i));
+}
+ for (auto i = 1; i <= 328; ++i) {
    mc(TString::Format(official, i), TString::Format("pruned/official_%d.root", i));
  }
 }
