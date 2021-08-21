@@ -88,7 +88,7 @@ void mc(TString fname = "root/zs04_5.root",
     return (std::abs(mcEta[i]) > 1.566) && (std::abs(mcEta[i]) < 2.1);
   };
   // fill pt based on eta region
-  auto fillPt = [&](TH1F &ee, TH1F eb, Size_t iGen, float genPt, double centWeight) {
+  auto fillPt = [&](TH1F &ee, TH1F &eb, Size_t iGen, float genPt, double centWeight) {
     if (ismcEE(iGen)) {
       ee.Fill(genPt, centWeight);
     } else if (ismcEB(iGen)) {
