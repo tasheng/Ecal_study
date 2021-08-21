@@ -12,6 +12,7 @@
 #include <array>
 #include <algorithm>
 #include <cmath>
+#include <map>
 
 /* map centrality to Ncoll for MC event weight */
 float findNcoll(int);
@@ -56,38 +57,56 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
   TTreeReaderArray<Float_t> phoHoverE(dreader, "phoHoverE");
   TTreeReaderArray<Float_t> mcCalIsoDR04(dreader, "mcCalIsoDR04");
 
+  // For gen EE EB separation
+  TTreeReaderArray<Float_t> mcEta(dreader, "mcEta");
+
   TFile fout(outName, "recreate");
   // histograms for efficiency study
   std::array<float, 6> ptbins = {15, 30, 40, 50, 80, 120};
   // total number of gen photon
-  TH1F total("tot", "total;pT/GeV", ptbins.size() - 1, ptbins.data());
+  TH1F totalEE("totEE", "total;pT/GeV", ptbins.size() - 1, ptbins.data());
+  TH1F totalEB("totEB", "total;pT/GeV", ptbins.size() - 1, ptbins.data());
   // gen photon that's matched to a RECO photon
-  TH1F matched("mat", "matched;pT/GeV", ptbins.size() - 1, ptbins.data());
-  total.Sumw2();
-  matched.Sumw2();
+  TH1F matchedEE("matEE", "matched;pT/GeV", ptbins.size() - 1, ptbins.data());
+  TH1F matchedEB("matEB", "matched;pT/GeV", ptbins.size() - 1, ptbins.data());
+  totalEE.Sumw2();
+  matchedEE.Sumw2();
+  totalEB.Sumw2();
+  matchedEB.Sumw2();
   // unweighted hists
   TH1F totaluw("totuw", "total;pT/GeV", ptbins.size() - 1, ptbins.data());
   TH1F matcheduw("matuw", "matched;pT/GeV", ptbins.size() - 1, ptbins.data());
   // histograms for energy scale study
-  std::array<TH1F *, ptbins.size()> eScale;
+  std::array<TH1F *, ptbins.size()> eScaleEE;
+  std::array<TH1F *, ptbins.size()> eScaleEB;
+  auto isEE = [&](int i) { return (std::abs(phoSCEta[i]) < 1.44); };
+  auto isEB = [&](int i) {
+    return (std::abs(phoSCEta[i]) > 1.566) && (std::abs(phoSCEta[i]) < 2.1);
+  };
+  auto ismcEE = [&](int i) { return (std::abs(mcEta[i]) < 1.44); };
+  auto ismcEB = [&](int i) {
+    return (std::abs(mcEta[i]) > 1.566) && (std::abs(mcEta[i]) < 2.1);
+  };
   for (auto i = 0; i < ptbins.size() - 1; ++i) {
-    eScale[i] =
-        new TH1F(TString::Format("esc%.0f_%.0f", ptbins[i], ptbins[i + 1]),
+    eScaleEE[i] =
+        new TH1F(TString::Format("escee%.0f_%.0f", ptbins[i], ptbins[i + 1]),
                  "Energy scale", 100, 0.4, 1.6);
-    eScale[i]->Sumw2();
+    eScaleEE[i]->Sumw2();
+    eScaleEB[i] =
+        new TH1F(TString::Format("esceb%.0f_%.0f", ptbins[i], ptbins[i + 1]),
+                 "Energy scale", 100, 0.4, 1.6);
+    eScaleEB[i]->Sumw2();
   }
   while (reader.Next()) {
     double centWeight = findNcoll(*centrality);
     dreader.Next();
     // gen matching
-    std::set<int> matchedGamma;
+    std::map<int, int> matchedGamma; // gen ID, reco ID
     for (int iPho = 0; iPho < *nPho; ++iPho) {
       int genMatchedIndex = genId[iPho];
       bool isMatched = (genMatchedIndex >= 0);
       bool isMatched2GenPhoton = (isMatched && mcPID[genMatchedIndex] == 22);
-      // store matched mc photon
       if (isMatched2GenPhoton) {
-        matchedGamma.insert(genMatchedIndex);
         float genPt = (*mcPt)[genMatchedIndex];
         // skip photons with out-of-range pT
         if (genPt < ptbins.front() || genPt > ptbins.back()) {
@@ -108,32 +127,41 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
         // Fill  energy scale / resolution
         int ptbin = std::lower_bound(ptbins.cbegin(), ptbins.cend(), genPt) -
                     ptbins.cbegin() - 1;
-        eScale[ptbin]->Fill(recoE[iPho]/mcE[genMatchedIndex], centWeight);
+        if (isEE(iPho)) {
+          eScaleEE[ptbin]->Fill(recoE[iPho] / mcE[genMatchedIndex], centWeight);
+        } else if (isEB(iPho)) {
+          eScaleEB[ptbin]->Fill(recoE[iPho] / mcE[genMatchedIndex], centWeight);
+        }
         // store matched gen photon index for later use
-        if (isMatched2GenPhoton) {
-          matchedGamma.insert(genMatchedIndex);
-        }
+        matchedGamma.insert({genMatchedIndex, iPho});
       }
-      // for every gen photon, fill hists based on its matching status
-      for (auto iGen = 0; iGen < (*mcPt).size(); ++iGen) {
-        float genPt = (*mcPt)[iGen];
-        if (genPt < ptbins.front() || genPt > ptbins.back()) {
-          continue;
-          // reject photons that failed HEM modules
-        } else if (!passedHI18HEMfailurePho(iGen)) {
-          continue;
-          // gen photon selection
-        } else if (mcCalIsoDR04[iGen] > 5) {
-          continue;
+    }
+    // for every gen photon, fill hists based on its matching status
+    for (auto iGen = 0; iGen < (*mcPt).size(); ++iGen) {
+      float genPt = (*mcPt)[iGen];
+      if (genPt < ptbins.front() || genPt > ptbins.back()) {
+        continue;
+        // reject photons that failed HEM modules
+      } else if (!passedHI18HEMfailurePho(matchedGamma[iGen])) {
+        continue;
+        // gen photon selection
+      } else if (mcCalIsoDR04[iGen] > 5) {
+        continue;
+      } else if (mcPID[iGen] != 22)
+        continue;
+      if (ismcEE(iGen)) {
+        totalEE.Fill(genPt, centWeight);
+      } else  if (ismcEB(iGen)) {
+          totalEB.Fill(genPt, centWeight);
         }
-        if (mcPID[iGen] != 22)
-          continue;
-        total.Fill(genPt, centWeight);
-        totaluw.Fill(genPt);
-        if (matchedGamma.count(iGen)) {
-          matched.Fill(genPt, centWeight);
-          matcheduw.Fill(genPt);
+      totaluw.Fill(genPt);
+      if (matchedGamma.count(iGen)) {
+        if (ismcEE(iGen)) {
+          matchedEE.Fill(genPt, centWeight);
+        } else if (ismcEE(iGen)) {
+          matchedEB.Fill(genPt, centWeight);
         }
+        matcheduw.Fill(genPt);
       }
     }
   }
