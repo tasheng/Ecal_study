@@ -106,8 +106,8 @@ void mc(TString fname = "root/zs04_5.root",
                  "Energy scale", 100, 0.4, 1.6);
     eScaleEB[i]->Sumw2();
   }
-  TH1F genpassEE("genpassEE", "genpass", 5, 0, 5);
-  TH1F genpassEB("genpassEB", "genpass", 5, 0, 5);
+  TH1F genpassEE("genpassEE", "genpass", 6, 0, 6);
+  TH1F genpassEB("genpassEB", "genpass", 6, 0, 6);
   while (reader.Next()) {
     double centWeight = findNcoll(*centrality);
     dreader.Next();
