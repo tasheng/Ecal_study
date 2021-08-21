@@ -136,19 +136,21 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
         matchedGamma.insert({genMatchedIndex, iPho});
       }
     }
+
     // for every gen photon, fill hists based on its matching status
     for (auto iGen = 0; iGen < (*mcPt).size(); ++iGen) {
       float genPt = (*mcPt)[iGen];
       if (genPt < ptbins.front() || genPt > ptbins.back()) {
         continue;
-        // reject photons that failed HEM modules
-      } else if (!passedHI18HEMfailurePho(matchedGamma[iGen])) {
+      } else if (mcPID[iGen] != 22) {
         continue;
         // gen photon selection
       } else if (mcCalIsoDR04[iGen] > 5) {
         continue;
-      } else if (mcPID[iGen] != 22)
+        // reject photons that failed HEM modules
+      } else if ((*nPho > 0) && !passedHI18HEMfailurePho(matchedGamma[iGen])) {
         continue;
+      }
       if (ismcEE(iGen)) {
         totalEE.Fill(genPt, centWeight);
       } else  if (ismcEB(iGen)) {
