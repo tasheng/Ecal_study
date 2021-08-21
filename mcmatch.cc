@@ -17,7 +17,7 @@
 /* map centrality to Ncoll for MC event weight */
 float findNcoll(int);
 
-void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
+void mc(TString fname = "root/zs04_5.root",
         TString outName = "mcmatch.root") {
   TChain *tch = new TChain("HiTree");
   tch->Add(fname);
@@ -87,6 +87,15 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
   auto ismcEB = [&](int i) {
     return (std::abs(mcEta[i]) > 1.566) && (std::abs(mcEta[i]) < 2.1);
   };
+  // fill pt based on eta region
+  auto fillPt = [&](TH1F &ee, TH1F eb, Size_t iGen, float genPt, double centWeight) {
+    if (ismcEE(iGen)) {
+      ee.Fill(genPt, centWeight);
+    } else if (ismcEB(iGen)) {
+      eb.Fill(genPt, centWeight);
+    }
+  };
+
   for (auto i = 0; i < ptbins.size() - 1; ++i) {
     eScaleEE[i] =
         new TH1F(TString::Format("escee%.0f_%.0f", ptbins[i], ptbins[i + 1]),
@@ -97,6 +106,8 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
                  "Energy scale", 100, 0.4, 1.6);
     eScaleEB[i]->Sumw2();
   }
+  TH1F genpassEE("genpassEE", "genpass", 5, 0, 5);
+  TH1F genpassEB("genpassEB", "genpass", 5, 0, 5);
   while (reader.Next()) {
     double centWeight = findNcoll(*centrality);
     dreader.Next();
@@ -140,29 +151,27 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
     // for every gen photon, fill hists based on its matching status
     for (auto iGen = 0; iGen < (*mcPt).size(); ++iGen) {
       float genPt = (*mcPt)[iGen];
+      fillPt(genpassEE, genpassEB, iGen, 0, centWeight);
       if (genPt < ptbins.front() || genPt > ptbins.back()) {
+        fillPt(genpassEE, genpassEB, iGen, 1, centWeight);
         continue;
       } else if (mcPID[iGen] != 22) {
+        fillPt(genpassEE, genpassEB, iGen, 2, centWeight);
         continue;
         // gen photon selection
       } else if (mcCalIsoDR04[iGen] > 5) {
+        fillPt(genpassEE, genpassEB, iGen, 3, centWeight);
         continue;
         // reject photons that failed HEM modules
       } else if ((*nPho > 0) && !passedHI18HEMfailurePho(matchedGamma[iGen])) {
+        fillPt(genpassEE, genpassEB, iGen, 4, centWeight);
         continue;
       }
-      if (ismcEE(iGen)) {
-        totalEE.Fill(genPt, centWeight);
-      } else  if (ismcEB(iGen)) {
-          totalEB.Fill(genPt, centWeight);
-        }
+      fillPt(genpassEE, genpassEB, iGen, 5, centWeight);
+      fillPt(totalEE, totalEB, iGen, genPt, centWeight);
       totaluw.Fill(genPt);
       if (matchedGamma.count(iGen)) {
-        if (ismcEE(iGen)) {
-          matchedEE.Fill(genPt, centWeight);
-        } else if (ismcEB(iGen)) {
-          matchedEB.Fill(genPt, centWeight);
-        }
+        fillPt(matchedEE, matchedEB, iGen, genPt, centWeight);
         matcheduw.Fill(genPt);
       }
     }
@@ -204,9 +213,10 @@ float findNcoll(int hiBin) {
 
 
 void mcmatch() {
-  // mc("pruned/zs04*.root", "out/zs04.root");
-  // mc("pruned/zs08*.root", "out/zs08.root");
-  // mc("pruned/zs10*.root", "out/zs10.root");
+  mc("pruned/zs04*.root", "out/zs04.root");
+  mc("pruned/zs08*.root", "out/zs08.root");
+  mc("pruned/zs10*.root", "out/zs10.root");
   mc("pruned/official*.root", "out/official.root");
+  // mc();
   return;
 }
