@@ -59,7 +59,7 @@ void mc(TString fname = "root/zs04_5.root",
 
   // For gen EE EB separation and HEM test
   TTreeReaderArray<Float_t> mcEta(dreader, "mcEta");
-  TTreeReaderArray<Float_t> mcPhi(dreader, "mcphi");
+  TTreeReaderArray<Float_t> mcPhi(dreader, "mcPhi");
 
   auto genPassedHI18HEMfailurePho = [&](int i) {
     return !(mcEta[i] < -1.2 && mcPhi[i] < -0.8 && mcPhi[i] > -1.8);
