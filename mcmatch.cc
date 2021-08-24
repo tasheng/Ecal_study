@@ -108,6 +108,7 @@ void mc(TString fname = "root/zs04_5.root",
   }
   TH1F genpassEE("genpassEE", "genpass", 6, 0, 6);
   TH1F genpassEB("genpassEB", "genpass", 6, 0, 6);
+  TH1F genpassuw("genpassuw", "genpass", 6, 0, 6);
   while (reader.Next()) {
     double centWeight = findNcoll(*centrality);
     dreader.Next();
@@ -152,6 +153,7 @@ void mc(TString fname = "root/zs04_5.root",
     for (auto iGen = 0; iGen < (*mcPt).size(); ++iGen) {
       float genPt = (*mcPt)[iGen];
       fillPt(genpassEE, genpassEB, iGen, 0, centWeight);
+      genpassuw.Fill(genPt);
       if (genPt < ptbins.front() || genPt > ptbins.back()) {
         fillPt(genpassEE, genpassEB, iGen, 1, centWeight);
         continue;
