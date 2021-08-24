@@ -164,15 +164,17 @@ void mc(TString fname = "root/zs04_5.root",
       } else if (mcCalIsoDR04[iGen] > 5) {
         fillPt(genpassEE, genpassEB, iGen, 3, centWeight);
         continue;
-        // reject photons that failed HEM modules
-      } else if ((*nPho > 0) && !passedHI18HEMfailurePho(matchedGamma[iGen])) {
+        // reject gen photons corresponding to the region with failed HEM modules
+      } else if (!genPassedHI18HEMfailurePho(iGen)) {
         fillPt(genpassEE, genpassEB, iGen, 4, centWeight);
         continue;
       }
       fillPt(genpassEE, genpassEB, iGen, 5, centWeight);
       fillPt(totalEE, totalEB, iGen, genPt, centWeight);
       totaluw.Fill(genPt);
-      if (matchedGamma.count(iGen)) {
+      // RECO selection
+      if (matchedGamma.count(iGen) && phoHoverE[matchedGamma[iGen]] < 0.1
+          && passedPhoSpikeRejection(iGen)) {
         fillPt(matchedEE, matchedEB, iGen, genPt, centWeight);
         matcheduw.Fill(genPt);
       }
