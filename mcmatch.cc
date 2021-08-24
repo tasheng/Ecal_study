@@ -57,8 +57,13 @@ void mc(TString fname = "root/zs04_5.root",
   TTreeReaderArray<Float_t> phoHoverE(dreader, "phoHoverE");
   TTreeReaderArray<Float_t> mcCalIsoDR04(dreader, "mcCalIsoDR04");
 
-  // For gen EE EB separation
+  // For gen EE EB separation and HEM test
   TTreeReaderArray<Float_t> mcEta(dreader, "mcEta");
+  TTreeReaderArray<Float_t> mcPhi(dreader, "mcphi");
+
+  auto genPassedHI18HEMfailurePho = [&](int i) {
+    return !(mcEta[i] < -1.2 && mcPhi[i] < -0.8 && mcPhi[i] > -1.8);
+  };
 
   TFile fout(outName, "recreate");
   // histograms for efficiency study
