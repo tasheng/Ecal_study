@@ -30,7 +30,7 @@ void mc(TString fname = "root/HiForestAOD_ZS_8-2.root",
                                 "phoSCRawE", "mcE", "mcPt", "phoSigmaIEtaIEta_2012",
                                 "pho_swissCrx", "pho_seedTime",
                                 "phoHoverE", "mcCalIsoDR04",
-                                "phoSCEta", "phoSCPhi", "mcEta"}) {
+                                "phoSCEta", "phoSCPhi", "mcEta", "mcPhi"}) {
     ntuple->SetBranchStatus(activeBranchName, 1);
   }
   evt->SetBranchStatus("hiBin", 1);
